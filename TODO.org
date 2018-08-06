@@ -1,0 +1,6 @@
+* Try getting act_police to work at all!
+  at every rate I've tried it at it went boom
+* Try merely adding ecn support to act_police
+* Try to understand the rate estimators better
+  I gave up on understanding these last time
+* Try to find a modern filter that returns act_shot
