@@ -31,11 +31,24 @@ static int tcf_bobbie(struct sk_buff *skb, const struct tc_action *a,
 	tcf_lastuse_update(&d->tcf_tm);
 	bstats_cpu_update(this_cpu_ptr(d->common.cpu_bstats), skb);
 
-	rcu_read_lock();
+	rcu_read_lock(); // But, er, we want to write some local state
 	params = rcu_dereference(d->params);
         action = 0;
 	//	action = READ_ONCE(d->tcf_action); // FIXME always shot
 
+	// start at thinking about how to collect these stats
+#if 0
+	{
+	s64 delta, ideal, actual;
+	s64 now = ktime_get_ns();
+	if (!skb->tstamp) skb->tstamp=now;
+	if (!skb->hash) skb->hash = skb_get_hash(skb);
+	delta = now - d->last;
+	ideal = delta * d->time_per_byte; // fixme, scale these
+	actual = delta - skb->len * d->time_per_byte;
+	if (d->over_start * 4 * 1000000 * NSEC_PER_SEC > now) ; // (re) start the drop schedule;
+	}
+#endif
 	if (params->flags & BOBBIE_F_ECN && INET_ECN_set_ce(skb)) { // Are we allowed to modify the header in flight?)
 	  action = 0; // log stat somewhere
 	}
@@ -50,10 +63,10 @@ err:
 }
 
 static const struct nla_policy bobbie_policy[TCA_BOBBIE_MAX + 1] = {
-	[TCA_BOBBIE_PARMS]		= { .len = sizeof(struct tc_bobbie) },
+	[TCA_BOBBIE_PARMS]	= { .len = sizeof(struct tc_bobbie) },
 	[TCA_BOBBIE_RATE]	= { .len = sizeof(u64) },
-	[TCA_BOBBIE_FLAGS]		= { .len = sizeof(u32) },
-	[TCA_BOBBIE_ECN]		= { .len = sizeof(u32) },
+	[TCA_BOBBIE_FLAGS]	= { .len = sizeof(u32) },
+	[TCA_BOBBIE_ECN]	= { .len = sizeof(u32) },
 };
 
 static int tcf_bobbie_init(struct net *net, struct nlattr *nla,
