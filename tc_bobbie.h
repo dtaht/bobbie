@@ -14,6 +14,9 @@ struct tcf_bobbie_params {
 struct tcf_bobbie {
 	struct tc_action common;
 	struct tcf_bobbie_params __rcu *params;
+	s64 time_per_byte;
+	s64 last;
+	s64 over_start;
 };
 
 #define to_bobbie(a) ((struct tcf_bobbie *)a)
