@@ -80,6 +80,7 @@ I've always worried about the "decay" phase of codel, also.
 If it works out produce an epbf version, and try to look into an fq-ish version
 
 # Random thoughts
+
 ## "TART"
 
 Given our preference for food puns and the really nice backronym
@@ -92,4 +93,21 @@ non-PC meaning.
 a single 64byte packet is 6ns. 
 
 Picosec seems required or using a shifted value, to get something right
+
+# Next steps
+
+I haven't had time to work on this in years. I started by looking over
+a modern tc filter (skbedit) (I also have a need to do ack_filtering
+in another project). oh, boy, is that arcane.
+
+## IT COMPILES
+## Need to look over the need for PAD
+## Find out if we can scribble on the contents of the packet itself
+## Write a tc filter module for passing the params
+## Write a codel-ish implementation that just keeps global state
+
+and triggers when we are over/under the target bytes/round
+
+## Start grabbing rates and so on
+
 
