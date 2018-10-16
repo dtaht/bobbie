@@ -95,7 +95,7 @@ double optimum_rate(struct shaperctl *s, double rate, int size) {
   /* the bobbie part is we have to drain the overage */
 
   /* fling things less far into the future as we approach our goal */
-  return 0;
+  return 1;
   
 }
 
@@ -131,12 +131,16 @@ int insert_skb(struct filterctl *f, struct sk_buff *skb) {
 }
 
 int main(int argc, char **argv) {
+  if (argc != 3) exit(-1);
+  
   double irate = atof(argv[1]);
   double orate = atof(argv[2]);
   struct sk_buff skb[MAXP];
   simtime s;
-  struct filterctl f; // FIXME initialize this
-  f.s = { .rate = 1, .optimum_rate = 1, .objective_rate = 1 };
+  struct filterctl f = {
+    .s = { .rate = 1, .optimum_rate = 1, .objective_rate = 1 }
+  };
+  //  f.s = { .rate = 1, .optimum_rate = 1, .objective_rate = 1 };
   
   for(int i = 0; i < MAXP; i++) {
     skb[i].size = 1000;
@@ -145,11 +149,12 @@ int main(int argc, char **argv) {
     };
   
   tick();
+
   int i = 0;
   do {
     do {
       if(skb[i].timestamp <= now) {
-	printf("%12g %s", now, insert_skb (&f,&skb[i]) == ACT_SHOT ?
+	printf("%12g %s\n", now, insert_skb (&f,&skb[i]) == ACT_SHOT ?
 	       "SHOT" : "SENT");
 	i++;
       }
