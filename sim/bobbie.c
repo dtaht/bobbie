@@ -83,7 +83,7 @@ u64 rate_set(struct shaperctl *s, u64 kbit, u64 interval) {
 /* Your classic boring rate estimator */
 
 double update_rate(struct shaperctl *s, double rate, int size) {
-  return 0;
+  return 2;
 }
 
 /* The optimum rate is "special".
@@ -130,8 +130,13 @@ int insert_skb(struct filterctl *f, struct sk_buff *skb) {
   return 0;
 }
 
+int usage(int argc, char **argv) {
+  fprintf(stdout, "usage:\n%s input_rate output_rate\n",argv[0]);
+  exit(-1);
+}
+
 int main(int argc, char **argv) {
-  if (argc != 3) exit(-1);
+  if (argc != 3) usage(argc,argv);
   
   double irate = atof(argv[1]);
   double orate = atof(argv[2]);
@@ -140,7 +145,6 @@ int main(int argc, char **argv) {
   struct filterctl f = {
     .s = { .rate = 1, .optimum_rate = 1, .objective_rate = 1 }
   };
-  //  f.s = { .rate = 1, .optimum_rate = 1, .objective_rate = 1 };
   
   for(int i = 0; i < MAXP; i++) {
     skb[i].size = 1000;
