@@ -12,6 +12,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 
 /* Inbound policer filter.
@@ -23,16 +24,24 @@
 
 /* Dave's Quick and Dirty packet emulator */
 
-#define ACT_SHOT = (-1)
-typedef simtime double;
+#define MAXP 1000 // max packets to test with
+#define MAXSIM 10000 // run the sim for 10usec tops
+#define ACT_SHOT (-1) // spoof ACT_SHOT
 
-struct skbuff {
+typedef double simtime;
+typedef uint64_t u64;
+
+struct sk_buff {
   int size;
   int hash;
   simtime timestamp;
 };
 
-u64 skb_set_time(struct skbuff *skb, u64 t) {
+struct codel_vars { // spoof codel for now
+  double last_over;
+};
+
+u64 skb_set_time(struct sk_buff *skb, simtime t) {
   return skb->timestamp = t;
 }
 
@@ -44,9 +53,7 @@ simtime get_simtime() {
   return now;
 }
 
-#define MAXSIM 64000
-
-simtime clock_advance(ns) {
+simtime clock_advance(simtime ns) {
   now += ns;
   if(now > MAXSIM) exit(-1);
   return now;
@@ -54,7 +61,7 @@ simtime clock_advance(ns) {
 
 simtime tick() { return clock_advance(1); }
 
-struct shapectl {
+struct shaperctl {
   double rate,optimum_rate, objective_rate;
   u64 bytes_over;
   simtime vclock;
@@ -62,79 +69,87 @@ struct shapectl {
 
 struct filterctl {
   struct codel_vars cvars;
-  struct shapectl s;
+  struct shaperctl s;
 } ;
 
 
 // objective_rate = 10mbits;
 
-rate_set(struct shapectl s, u64 kbit, u64 interval) {
+u64 rate_set(struct shaperctl *s, u64 kbit, u64 interval) {
   // fancy math
+  return 0;
 }
 
 /* Your classic boring rate estimator */
 
-double update_rate(struct shaperctl *s, double rate, size) {
+double update_rate(struct shaperctl *s, double rate, int size) {
+  return 0;
 }
 
 /* The optimum rate is "special".
    Instead of slowing down the packets we speed up the clock,
    and fling the scheduling decision into the future. */
 
-double optimum_rate(struct shaperctl *s, double rate, size) {
+double optimum_rate(struct shaperctl *s, double rate, int size) {
 
   /* the bobbie part is we have to drain the overage */
 
   /* fling things less far into the future as we approach our goal */
+  return 0;
   
 }
 
 // for testing drop every 4th packet we hit
 
-skb should_drop(f->cvars, skb) {
-  static m = 0;
+struct sk_buff *should_drop(struct codel_vars *c, struct sk_buff *skb) {
+  static int m = 0;
   if(++m % 4 == 0) return NULL;
   return skb;
 }
 
-int insert_skb(struct filterctl *f, skb_buff *skb) {
-    u64 now;
-    if(!now = skb->timestamp) 
-          now = timestamp(skb);
-    rate = update_rate(f->s, now, skb->size);
-    optimum_rate = optimium_rate(f, now, rate); // magic
-    if (rate > optimimum) {
-      // More magic
-      f->s.vclock += now + (rate - optimum_rate);
-      skb_set_time(skb, f->s.vclock);
-      if(should_drop(f->cvars, skb)) {
-	return ACT_SHOT;
-      }
-    } else {
-	f->s.vclock = now;
+int insert_skb(struct filterctl *f, struct sk_buff *skb) {
+  u64 now;
+  if(!(now = skb->timestamp)) 
+    now = skb_set_time(skb, get_simtime());
+  
+  u64 rate = update_rate(&f->s, now, skb->size);
+  u64 optimum = optimum_rate(&f->s, now, rate); // magic
+
+  // fixme We need to turn this back into intervals
+  
+  if (rate > optimum) {
+    // More magic
+    f->s.vclock += now + (rate - optimum);
+    skb_set_time(skb, f->s.vclock);
+    if(should_drop(&f->cvars, skb)) {
+      return ACT_SHOT;
     }
-    return 0;
+  } else {
+    f->s.vclock = now;
+  }
+  return 0;
 }
 
-main(int argv, char **argv) {
-  double irate = atod(argv[1]);
-  double orate = atod(argv[2]);
-  struct skb_buff skb[MAXP];
+int main(int argc, char **argv) {
+  double irate = atof(argv[1]);
+  double orate = atof(argv[2]);
+  struct sk_buff skb[MAXP];
   simtime s;
+  struct filterctl f; // FIXME initialize this
   
-  for(int i = 0; i < MAXP; i++)
-    skb[i]. {
-      size = 1000;
-      hash = 0;
-      timestamp = irate * clock++; // fixme 
+  for(int i = 0; i < MAXP; i++) {
+    skb[i].size = 1000;
+    skb[i].hash = 0;
+    skb[i].timestamp = 0; // irate * clock++; // fixme 
     };
   
   tick();
   int i = 0;
   do {
     do {
-      if(pkt[i]->timestamp <= now) {
-	printf("%12g %s", now, insert(skb) == ACT_SHOT : "SHOT", "SENT");
+      if(skb[i].timestamp <= now) {
+	printf("%12g %s", now, insert_skb (&f,&skb[i]) == ACT_SHOT ?
+	       "SHOT" : "SENT");
 	i++;
       }
     } while(now = tick());
