@@ -21,17 +21,31 @@ And we want to rescale the inbound rate to the ideal rate:
 
 creating a virtual clock that can run forward.
 
-
 Now that we have a virtual clock running ahead of time with the
-*same delay 
+same delay as we would have got were an actual shaper in place...
+
+we can then start pretending that codel's drop algorithm can take place
+by figuring out the delay from the real time to the virtual time.
+
+* Problem 1
 
 The virtual clock has got to increase monotonically, until at some point
 the real clock "catches up".
 
+We convert rate into time per byte, which, using a nanosecond clock,
+which is woefully inaccurate.
+
 that's not the only problem. 
 
+* Adding FQ
+
+Each flow gets a virtual clock with an initial default min(now, vclock);
+
+If we get more than one packet in a row, we cast it into the future based on it's size and independent of the other flows we got.
+
+This provides entropy, not FQ, but mixes up packets from different flows,
+assuming an ETX scheduler on the other side.
 
 
-We convert rate into time per byte, which, using a nanosecond clock.
 
 
