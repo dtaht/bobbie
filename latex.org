@@ -1,0 +1,39 @@
+#+STARTUP: nolatexpreview
+#+OPTIONS: tex:t
+
+\begin{equation}
+rate=data/interval
+\end{equation}
+
+Another way to look at this of course, is that:
+
+\begin{equation}
+interval * rate = data
+\end{equation}
+
+But the real transform we want is 
+
+\begin{equation}
+interval = data / rate
+\end{equation}
+
+And we want to rescale the inbound rate to the ideal rate:
+
+creating a virtual clock that can run forward.
+
+
+Now that we have a virtual clock running ahead of time with the
+*same delay 
+
+The virtual clock has got to increase monotonically, until at some point
+the real clock "catches up".
+
+that's not the only problem. 
+
+
+
+We convert rate into time per byte, which, using a nanosecond clock.
+
+If $a^2=b$ and \( b=2 \), then the solution must be
+either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
+
