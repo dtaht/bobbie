@@ -1,5 +1,5 @@
 /* The "Bobbie" policer algorithm 
-   I thought about filing a patent. */
+   I thought about filing a patent but called for another beer. */
 
 /* Bobbie applies an adaptation of the codel algorithm 
    to manage a virtual clock for its drop schedule.
@@ -62,7 +62,7 @@ simtime clock_advance(simtime ns) {
 simtime tick() { return clock_advance(1); }
 
 struct shaperctl {
-  double rate,optimum_rate, objective_rate;
+  double rate, optimum_rate, objective_rate;
   u64 bytes_over;
   simtime vclock;
 };
@@ -73,7 +73,7 @@ struct filterctl {
 } ;
 
 
-// objective_rate = 10mbits;
+// objective_rate = 10mbit/s;
 
 u64 rate_set(struct shaperctl *s, u64 kbit, u64 interval) {
   // fancy math
@@ -136,11 +136,12 @@ int main(int argc, char **argv) {
   struct sk_buff skb[MAXP];
   simtime s;
   struct filterctl f; // FIXME initialize this
+  f.s = { .rate = 1, .optimum_rate = 1, .objective_rate = 1 };
   
   for(int i = 0; i < MAXP; i++) {
     skb[i].size = 1000;
     skb[i].hash = 0;
-    skb[i].timestamp = 0; // irate * clock++; // fixme 
+    skb[i].timestamp = i; // irate * clock++; // fixme 
     };
   
   tick();
