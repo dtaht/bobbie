@@ -1,10 +1,12 @@
 
 rate = data/interval;
 
-In our equation, rate and interval are constants.
+In our desired equation, rate and interval are constants.
 
 rate = 100.
 interval = 10ms.
+
+In the real world.
 
 so what we want to do is solve for data
 
