@@ -28,7 +28,7 @@ static int tcf_bobbie(struct sk_buff *skb, const struct tc_action *a,
 	struct tcf_bobbie_params *params;
 	int action;
 
-	tcf_lastuse_update(&d->tcf_tm);
+	tcf_lastuse_update(&d->tcf_tm); // Do we get a timestamp from this?
 	bstats_cpu_update(this_cpu_ptr(d->common.cpu_bstats), skb);
 
 	rcu_read_lock(); // But, er, we want to write some local state
@@ -41,14 +41,17 @@ static int tcf_bobbie(struct sk_buff *skb, const struct tc_action *a,
 	{
 	s64 delta, ideal, actual;
 	s64 now = ktime_get_ns();
-	if (!skb->tstamp) skb->tstamp=now;
-	if (!skb->hash) skb->hash = skb_get_hash(skb);
+	// if (!skb->tstamp) skb->tstamp=now;
+	// if (!skb->hash) skb->hash = skb_get_hash(skb);
 	delta = now - d->last;
 	ideal = delta * d->time_per_byte; // fixme, scale these
-	actual = delta - skb->len * d->time_per_byte;
+	actual = ideal - skb->len * d->time_per_byte;
+	// FIXME: over_bytes? starting at a given point
 	if (d->over_start * 4 * 1000000 * NSEC_PER_SEC > now) ; // (re) start the drop schedule;
 	}
 #endif
+	//         err = skb_ensure_writable(skb, MAX_EDIT_LEN); ?
+	// may_pull?
 	if (params->flags & BOBBIE_F_ECN && INET_ECN_set_ce(skb)) { // Are we allowed to modify the header in flight?)
 	  action = 0; // log stat somewhere
 	}
