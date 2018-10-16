@@ -4,10 +4,13 @@
 /* Bobbie applies an adaptation of the codel algorithm 
    to manage a virtual clock for its drop schedule.
 
+   " Time is relative, lunchtime more so. "
+
    This results in a kinder, gentler policer. Hopefully.
 
    When used with an ETX scheduler, packets are also pushed into the
    future. 
+
 
 */
 
@@ -77,7 +80,7 @@ struct filterctl {
 
 u64 rate_set(struct shaperctl *s, u64 kbit, u64 interval) {
   // fancy math
-  return 0;
+  return 1;
 }
 
 /* Your classic boring rate estimator */
@@ -95,6 +98,7 @@ double optimum_rate(struct shaperctl *s, double rate, int size) {
   /* the bobbie part is we have to drain the overage */
 
   /* fling things less far into the future as we approach our goal */
+
   return 1;
   
 }
